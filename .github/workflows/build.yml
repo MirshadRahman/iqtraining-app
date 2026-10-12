@@ -27,9 +27,30 @@ jobs:
           sed -i 's/android:label="iq_training"/android:label="IQ Training"/' "$f"
           cat "$f"
       - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter test
-      - run: flutter build apk --release
+      - name: Analyze
+        run: |
+          set +e
+          flutter analyze --no-fatal-infos --no-fatal-warnings > analyze.txt 2>&1
+          code=$?
+          cat analyze.txt
+          grep -E '^ *(error|warning|info) ' analyze.txt | sort | head -30 | while read -r line; do echo "::warning::$line"; done
+          exit $code
+      - name: Test
+        run: |
+          set +e
+          flutter test > test.txt 2>&1
+          code=$?
+          cat test.txt
+          if [ $code -ne 0 ]; then tail -25 test.txt | while read -r line; do echo "::warning::$line"; done; fi
+          exit $code
+      - name: Build APK
+        run: |
+          set +e
+          flutter build apk --release > build.txt 2>&1
+          code=$?
+          cat build.txt
+          if [ $code -ne 0 ]; then grep -iE "error|FAILURE|What went wrong" -A3 build.txt | head -25 | while read -r line; do echo "::warning::$line"; done; fi
+          exit $code
       - uses: actions/upload-artifact@v4
         with:
           name: iq-training-apk

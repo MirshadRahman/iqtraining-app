@@ -25,7 +25,7 @@ class AppConfig {
 
   /// Sales pages that must not open inside the app (store rules on selling
   /// digital content). Exact matches only: LearnDash lessons also live under
-  /// /courses/<slug>/, so /courses/ must not be blocked as a prefix.
+  /// `/courses/<slug>/`, so /courses/ must not be blocked as a prefix.
   static const blockedExactPaths = <String>[
     '/',
     '/courses/',

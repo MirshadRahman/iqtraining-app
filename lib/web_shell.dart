@@ -211,6 +211,7 @@ class _WebShellState extends State<WebShell> {
                 onWebViewCreated: (controller) => _web = controller,
                 shouldOverrideUrlLoading: _onNavigate,
                 onCreateWindow: _onCreateWindow,
+                // ignore: deprecated_member_use
                 onDownloadStartRequest: _onDownload,
                 onUpdateVisitedHistory: _onVisited,
                 onLoadStart: (controller, url) {

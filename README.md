@@ -6,7 +6,7 @@ downloads, pull to refresh and an offline screen. Course sales pages are kept
 out of the app; the printed certificate can be ordered in it.
 
 This code has not been compiled yet. It was written against the
-flutter_inappwebview 6.1 API, but the first `flutter analyze` and device run
+flutter_inappwebview 6.2 beta API (the 6.1 stable release fails to build on current Android tooling), but the first `flutter analyze` and device run
 happen on your machine.
 
 ## 1. Create the platform folders

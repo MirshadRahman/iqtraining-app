@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate platform folders
+        run: flutter create --org uk.co.iqtraining --project-name iq_training --platforms android,ios .
+      - name: Patch Android manifest
+        run: |
+          f=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' "$f"
+          sed -i 's/android:label="iq_training"/android:label="IQ Training"/' "$f"
+          cat "$f"
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iq-training-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate platform folders
+        run: flutter create --org uk.co.iqtraining --project-name iq_training --platforms android,ios .
+      - name: Patch Info.plist
+        run: |
+          p=ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 'IQ Training'" "$p"
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Take a photo to upload to your course.'" "$p"
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string 'Choose a photo to upload to your course.'" "$p"
+          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'Record video to upload to your course.'" "$p"
+      - run: flutter pub get
+      - run: flutter build ios --simulator --debug
